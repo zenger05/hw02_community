@@ -5,6 +5,7 @@ User = get_user_model()
 
 
 class Post(models.Model):
+    objects = None
     text = models.TextField()
     pub_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
@@ -14,9 +15,9 @@ class Post(models.Model):
         blank=True,
         null=True,
     )
-
     def __str__(self):
-        return f"{self.author.name} - {self.pk}"
+        return(self.text)
+
 
 
 class Group(models.Model):
