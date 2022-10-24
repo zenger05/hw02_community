@@ -27,3 +27,12 @@ class Group(models.Model):
 
     def __str__(self):
         return self.title
+
+class PostCreate(models.Model):
+    text = models.TextField()
+    group = models.ForeignKey(
+        'Group',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
