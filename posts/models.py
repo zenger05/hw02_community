@@ -5,7 +5,6 @@ User = get_user_model()
 
 
 class Post(models.Model):
-    objects = None
     text = models.TextField()
     pub_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
@@ -18,6 +17,9 @@ class Post(models.Model):
     def __str__(self):
         return(self.text)
 
+    def get_absolute_url(self):
+        return f'/posts/{self.pk}/'
+
 
 
 class Group(models.Model):
@@ -28,11 +30,3 @@ class Group(models.Model):
     def __str__(self):
         return self.title
 
-class PostCreate(models.Model):
-    text = models.TextField()
-    group = models.ForeignKey(
-        'Group',
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True,
-    )

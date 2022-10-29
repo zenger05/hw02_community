@@ -1,6 +1,25 @@
-from django.shortcuts import render, get_object_or_404
+import self as self
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
+from django.urls import reverse_lazy
+from django.views.generic import UpdateView
+
 from .models import Post, Group
+from .forms import CreateForm
+
+def authorized_only(func):
+    # Функция-обёртка в декораторе может быть названа как угодно
+    def check_user(request, *args, **kwargs):
+        # В любую view-функцию первым аргументом передаётся объект request,
+        # в котором есть булева переменная is_authenticated,
+        # определяющая, авторизован ли пользователь.
+        if request.user.is_authenticated:
+            # Возвращает view-функцию, если пользователь авторизован.
+            return func(request, *args, **kwargs)
+        # Если пользователь не авторизован — отправим его на страницу логина.
+        return redirect('/auth/login/')
+    return check_user
 
 
 def index(request):
@@ -30,9 +49,11 @@ def group_posts(request, slug):
     paginator = Paginator(post_list, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+    post = post_list.first()
     context = {
         'group': group,
         'page_obj': page_obj,
+        'post': post,
     }
     return render(request, 'posts/group_list.html', context=context)
 
@@ -42,9 +63,11 @@ def profile(request, username):
     paginator = Paginator(posts, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+    post = posts.first()
     context = {
         'page_obj': page_obj,
         'count': post_count,
+        'post': post,
     }
     return render(request, 'posts/profile.html', context=context)
 
@@ -58,7 +81,31 @@ def post_detail(request, post_id):
     }
     return render(request, 'posts/post_detail.html', context=context)
 
+@authorized_only
 def post_create(request):
-    pass
+    if request.method == 'POST':
+        form = CreateForm(request.POST)
+        groups = Group.objects.all()
+        if form.is_valid():
+            instance = form.save(commit=False)
+            instance.author = request.user
+            instance.save()
+            return redirect('posts:index')
+    else:
+        form = CreateForm()
+    context = {
+        'form': form,
+    }
+    return render(request, 'posts/create.html', context=context)
 
+class Post_edit(UpdateView):
+    model = Post
+    template_name = 'posts/create.html'
+    form_class = CreateForm
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.author != self.request.user:
+            raise Http404("You are not allowed to edit this Post")
+        return super(Post_edit, self).dispatch(request, *args, **kwargs)
 
