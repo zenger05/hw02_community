@@ -7,12 +7,13 @@ User = get_user_model()
 class Post(models.Model):
     text = models.TextField()
     pub_date = models.DateTimeField(auto_now_add=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Автор')
     group = models.ForeignKey(
         'Group',
         on_delete=models.CASCADE,
         blank=True,
         null=True,
+        verbose_name='Группа',
     )
 
     def __str__(self):

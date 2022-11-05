@@ -1,5 +1,6 @@
 import self as self
 from django.contrib.auth.decorators import login_required
+from django.http import Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
 from django.urls import reverse_lazy
@@ -85,7 +86,6 @@ def post_detail(request, post_id):
 def post_create(request):
     if request.method == 'POST':
         form = CreateForm(request.POST)
-        groups = Group.objects.all()
         if form.is_valid():
             instance = form.save(commit=False)
             instance.author = request.user
@@ -98,7 +98,7 @@ def post_create(request):
     }
     return render(request, 'posts/create.html', context=context)
 
-class Post_edit(UpdateView):
+class PostEdit(UpdateView):
     model = Post
     template_name = 'posts/create.html'
     form_class = CreateForm
@@ -107,5 +107,5 @@ class Post_edit(UpdateView):
         obj = self.get_object()
         if obj.author != self.request.user:
             raise Http404("You are not allowed to edit this Post")
-        return super(Post_edit, self).dispatch(request, *args, **kwargs)
+        return super(PostEdit, self).dispatch(request, *args, **kwargs)
 

@@ -1,4 +1,4 @@
-from django.test import TestCase, Client
+from django.test import TestCase
 from django.contrib.auth import get_user_model
 
 from posts.models import Group, Post
@@ -24,3 +24,7 @@ class PostsTest(TestCase):
 
     def test_str_model(self):
         self.assertEqual(self.group.title, str(self.group))
+
+    def test_verbose_name_model(self):
+        self.assertEqual(self.post._meta.get_field('group').verbose_name, 'Группа')
+        self.assertEqual(self.post._meta.get_field('author').verbose_name, 'Автор')
