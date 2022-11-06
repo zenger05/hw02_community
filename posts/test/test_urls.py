@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
-from http import HTTPStatus
+
 
 from posts.models import Post, Group
 
@@ -55,6 +55,3 @@ class PostUrlTests(TestCase):
             with self.subTest(url=url):
                 response = self.authorized_client.get(url)
                 self.assertTemplateUsed(response, template)
-
-
-
